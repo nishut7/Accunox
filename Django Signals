@@ -1,0 +1,76 @@
+##Question 1:
+By default, are Django signals executed synchronously or asynchronously?
+Support your answer with a code snippet that conclusively proves your stance.
+
+##Answer:
+By default, Django signals are executed synchronously. This means the signal handler is executed in the same process flow as the sender, and the sender must wait for the handler to finish before continuing.
+
+#Code Snippet:
+
+import time
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
+@receiver(post_save, sender=User)
+def slow_signal_handler(sender, instance, **kwargs):
+    print("Signal handler started")
+    time.sleep(5)  # Simulating a delay
+    print("Signal handler finished")
+
+# Create a new user to trigger the signal
+User.objects.create(username="test_user")
+
+print("This will print after the signal handler finishes.")
+
+#Explanation: When the User.objects.create() is called, the signal handler will start, and the script will wait for 5 seconds (due to the time.sleep(5)) before printing the final message. This shows that the signal is executed synchronously.
+
+##Question 2:
+Do Django signals run in the same thread as the caller?
+Support your answer with a code snippet that conclusively proves your stance.
+
+##Answer:
+Yes, by default, Django signals run in the same thread as the caller.
+
+#Code Snippet:
+
+import threading
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
+@receiver(post_save, sender=User)
+def check_thread(sender, instance, **kwargs):
+    print(f"Signal is running in thread: {threading.current_thread().name}")
+
+print(f"Main thread is: {threading.current_thread().name}")
+User.objects.create(username="test_user")
+#Explanation: Both the main thread and the thread running the signal handler will have the same name, indicating that the signal runs in the same thread as the caller.
+
+##Question 3:
+By default, do Django signals run in the same database transaction as the caller?
+Support your answer with a code snippet that conclusively proves your stance.
+
+##Answer:
+Yes, by default, Django signals run within the same database transaction as the caller. If an exception occurs in the signal, it can affect the transaction.
+
+#Code Snippet:
+
+from django.db import transaction
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
+@receiver(post_save, sender=User)
+def trigger_exception(sender, instance, **kwargs):
+    raise Exception("This will cause the transaction to roll back")
+
+try:
+    with transaction.atomic():
+        User.objects.create(username="test_user")
+except Exception as e:
+    print("Transaction rolled back due to signal failure:", str(e))
+
+print("Check if the user was saved in the database.")
+#Explanation: The exception raised in the signal will cause the database transaction to roll back, preventing the user from being saved. This shows that signals run within the same transaction as the caller.
+
