@@ -1,0 +1,60 @@
+##DESCRIPTION: You are tasked with creating a Rectangle class with the following requirements:
+
+An instance of the Rectangle class requires length:int and width:int to be initialized.
+We can iterate over an instance of the Rectangle class 
+When an instance of the Rectangle class is iterated over, we first get its length in the format: {'length': <VALUE_OF_LENGTH>} followed by the width {width: <VALUE_OF_WIDTH>}
+
+
+##SOLUTION:
+Here’s a general implementation of a class that allows inserting and removing values, while still making it iterable:
+
+#Code Snippet:
+
+
+class GeneralClass:
+    def __init__(self, **kwargs):
+        self.data = kwargs
+
+    def insert(self, key, value):
+        """Inserts a new key-value pair into the class."""
+        self.data[key] = value
+
+    def remove(self, key):
+        """Removes a key-value pair from the class."""
+        if key in self.data:
+            del self.data[key]
+        else:
+            print(f"Key '{key}' not found.")
+
+    def __iter__(self):
+        """Allows the instance to be iterable, yielding key-value pairs."""
+        for key, value in self.data.items():
+            yield {key: value}
+
+# Example usage
+obj = GeneralClass(length=10, width=5)
+
+# Insert new values
+obj.insert('height', 15)
+
+# Remove a value
+obj.remove('width')
+
+# Iterate over the object
+for item in obj:
+    print(item)
+
+
+# Explanation:
+- **`insert(key, value)`**: Adds or updates a key-value pair in the class.
+- **`remove(key)`**: Deletes the specified key-value pair from the class.
+- **`__iter__` method**: Makes the instance iterable, yielding each key-value pair as a dictionary.
+
+## Example Output:
+
+{'length': 10}
+{'height': 15}
+
+
+This implementation is general and works for any set of values, not just rectangles.
+
